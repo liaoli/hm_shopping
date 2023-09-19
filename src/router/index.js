@@ -12,28 +12,28 @@ Vue.use(VueRouter)
 const router = new VueRouter({
   routes: [
     {
-      path: '/login',
+      path: '/',
       component: Login
     },
     {
-      path: '/',
+      path: '/home',
       component: Layout,
       redirect: '/home',
       children: [
         {
-          path: 'home',
+          path: '/home',
           component: Home
         },
         {
-          path: 'category',
+          path: '/category',
           component: Category
         },
         {
-          path: 'cart',
+          path: '/cart',
           component: Cart
         },
         {
-          path: 'user',
+          path: '/user',
           component: User
         }
       ]

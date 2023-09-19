@@ -1,10 +1,10 @@
 <template>
-  <div>inex</div>
+  <div>home</div>
 </template>
 <script>
 export default {
   name: 'HomePage'
 }
 </script>
-<style>
+<style lang="less" scoped>
 </style>
