@@ -12,11 +12,11 @@ Vue.use(VueRouter)
 const router = new VueRouter({
   routes: [
     {
-      path: '/',
+      path: '/login',
       component: Login
     },
     {
-      path: '/home',
+      path: '/',
       component: Layout,
       redirect: '/home',
       children: [
