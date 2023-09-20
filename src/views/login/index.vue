@@ -9,15 +9,15 @@
 
       <div class="form">
         <div class="form-item">
-          <input class="inp" maxlength="11" placeholder="请输入手机号码" type="text">
+          <input v-model="mobile" class="inp" maxlength="11" placeholder="请输入手机号码" type="text">
         </div>
         <div class="form-item">
-          <input class="inp" maxlength="5" placeholder="请输入图形验证码" type="text">
-          <img src="@/assets/code.png" alt="">
+          <input v-model="picCode" class="inp" maxlength="5" placeholder="请输入图形验证码" type="text">
+          <img v-if="picUrl" :src="picUrl"  alt="" @click="getPicCode">
         </div>
         <div class="form-item">
           <input class="inp" placeholder="请输入短信验证码" type="text">
-          <button>获取验证码</button>
+          <button @click="getCode">{{ second === totalSecond ? '获取验证码' : second + '秒后重新发送' }}</button>
         </div>
       </div>
 
@@ -27,20 +27,61 @@
 </template>
 
 <script>
-import request from '@/utils/request'
+import { getPicCode, getMsgCode } from '@/api/login'
 export default {
   name: 'LoginPage',
   async created () {
     this.getPicCode()
-    console.log(res)
+  },
+  destroyed () {
+    clearInterval(this.timer)
+  },
+  data () {
+    return {
+      picUrl: '',
+      picKey: '',
+      mobile: '',
+      picCode: '',
+      totalSecond: 60, // 总秒数
+      second: 60, // 倒计时秒数
+      timer: null // 定时器
+    }
   },
   methods: {
     async getPicCode () {
-      const res = await request.get('/captcha/image')
-    }
-    //写一个冒泡排序
-    
+      const { data: { base64, key } } = await getPicCode()
+      this.picUrl = base64
+      this.picKey = key
+    },
+    valiFn () {
+      if (!/^1[3-9]\d{9}$/.test(this.mobile)) {
+        this.$toast('请输入正确的手机号')
+        return false
+      }
+      if (!/^\w{4}$/.test(this.picCode)) {
+        this.$toast('请输入正确的图形验证码')
+        return false
+      }
+      return true
+    },
+    async getCode () {
+      if (!this.valiFn()) {
+        return
+      }
+      if (!this.timer && this.second === this.totalSecond) {
+        this.timer = setInterval(() => {
+          this.second--
+          if (this.second < 1) {
+            clearInterval(this.timer)
+            this.timer = null
+            this.second = this.totalSecond
+          }
+        }, 1000)
+      }
+      await getMsgCode(this.picCode, this.picKey, this.mobile)
 
+      this.$toast('发送成功，请注意查收')
+    }
   }
 }
 </script>
