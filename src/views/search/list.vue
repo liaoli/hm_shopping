@@ -38,7 +38,9 @@ export default {
   methods: {
     getProList () {
       return getProList({
-        page: this.page
+        page: this.page,
+        goodsName: this.querySearch,
+        categoryId: this.$route.query.categoryId
       }).then(res => {
         this.proList = res.data
       })
