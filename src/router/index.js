@@ -49,7 +49,7 @@ const router = new VueRouter({
       component: Search
     },
     {
-      path: '/searchList',
+      path: '/searchlist',
       component: SearchList
     },
     {
