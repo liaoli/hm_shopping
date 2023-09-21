@@ -6,16 +6,16 @@
     <van-button type="warning"> 警告按钮</van-button>
     <van-button type="danger"> 危险按钮</van-button> -->
     <router-view/>
-    <LoginPage></LoginPage>
+    <!-- <LoginPage></LoginPage> -->
   </div>
 </template>
 
 <script>
-import LoginPage from '@/views/login'
-
 export default {
-  components: {
-    LoginPage
+  data () {
+    return {
+
+    }
   }
 }
 </script>
