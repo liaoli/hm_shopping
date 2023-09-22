@@ -71,6 +71,7 @@
         <span>首页</span>
       </div>
       <div class="icon-cart">
+        <span v-if="cartTotal > 0" class="num">{{ cartTotal }}</span>
         <van-icon name="shopping-cart-o" />
         <span>购物车</span>
       </div>
@@ -78,7 +79,7 @@
       <div class="btn-buy" @click="buyFn">立刻购买</div>
     </div>
     <!-- 加入购入车弹窗 -->
-    <van-action-sheet v-model="showPannel" :title="mode === 'cart' ? '加入购物车' : '立刻购买'">
+    <van-action-sheet v-model="showPannel" :title="model === 'cart' ? '加入购物车' : '立刻购买'">
       <div class="product">
         <div class="product-title">
           <div class="left">
@@ -113,6 +114,7 @@
 import { getProComments, getProDetail } from '@/api/product'
 import defaultImg from '@/assets/default-avatar.png'
 import CountBox from '@/components/CountBox.vue'
+import { addCart2Server } from '@/api/cart'
 export default {
   name: 'ProDetail',
   async created () {
@@ -132,7 +134,8 @@ export default {
       defaultImg,
       model: 'cart',
       showPannel: false,
-      addCount: 1
+      addCount: 1,
+      cartTotal: 0
     }
   },
   components: {
@@ -163,7 +166,7 @@ export default {
     },
     async addCart () {
       // 判断是否登录，如果未登录 对话框提示登录
-      debugger
+      // debugger
       if (!this.$store.getters['user/token']) {
         this.$dialog.confirm({
           title: '请先登录',
@@ -183,6 +186,10 @@ export default {
       } else {
         // 添加购物车逻辑
         console.log('添加购物车逻辑')
+        const { data } = await addCart2Server(this.goodsId, this.addCount, this.detail.skuList[0].goods_sku_id)
+        this.cartTotal = data.cartTotal
+        this.$toast('加入购物车成功')
+        this.showPannel = false
       }
     }
   },
@@ -358,6 +365,22 @@ export default {
 
     .btn-buy {
       background-color: #fe5630;
+    }
+  }
+  .footer .icon-cart {
+  position: relative;
+  padding: 0 6px;
+    .num {
+      z-index: 999;
+      position: absolute;
+      top: -2px;
+      right: 0;
+      min-width: 16px;
+      padding: 0 4px;
+      color: #fff;
+      text-align: center;
+      background-color: #ee0a24;
+      border-radius: 50%;
     }
   }
 }
