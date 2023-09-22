@@ -95,6 +95,8 @@ export default {
       this.$store.commit('user/setUserInfo', res.data)
       // this.$router.push('/')
       this.$toast('登录成功')
+      const toPath = this.$route.query.backUrl || '/'
+      this.$router.replace(toPath)
     }
   }
 }

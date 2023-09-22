@@ -2,7 +2,6 @@ const INFO_KEY = 'user_info'
 // 获取用户信息
 export const getInfo = () => {
   const result = localStorage.getItem(INFO_KEY)
-
   if (result) {
     return JSON.parse(result)
   }

@@ -47,7 +47,7 @@
           <div class="top">
             <img :src="item.user.avatar_url || defaultImg" alt="">
             <div class="name">神雕大侠</div>
-            <van-rate :size="16" :value="5" color="#ffd21e" void-icon="star" void-color="#eee"/>
+            <van-rate :size="16" :value="5" color="#ffd21e" void-icon="star" void-color="#eee" />
           </div>
           <div class="content">
             质量很不错 挺喜欢的
@@ -74,15 +74,45 @@
         <van-icon name="shopping-cart-o" />
         <span>购物车</span>
       </div>
-      <div class="btn-add">加入购物车</div>
-      <div class="btn-buy">立刻购买</div>
+      <div class="btn-add" @click="addFn">加入购物车</div>
+      <div class="btn-buy" @click="buyFn">立刻购买</div>
     </div>
+    <!-- 加入购入车弹窗 -->
+    <van-action-sheet v-model="showPannel" :title="mode === 'cart' ? '加入购物车' : '立刻购买'">
+      <div class="product">
+        <div class="product-title">
+          <div class="left">
+            <img :src="detail.goods_image" alt="">
+          </div>
+          <div class="right">
+            <div class="price">
+              <span>¥</span>
+              <span class="nowprice">{{ detail.goods_price_min }}</span>
+            </div>
+            <div class="count">
+              <span>库存</span>
+              <span>{{ detail.stock_total }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="num-box">
+          <span>数量</span>
+          <CountBox v-model="addCount"></CountBox>
+        </div>
+        <div class="showbtn" v-if="detail.stock_total > 0">
+          <div class="btn" v-if="model === 'cart'" @click="addCart">加入购物车</div>
+          <div class="btn now" v-if="model === 'buy'">立刻购买</div>
+        </div>
+        <div class="btn-none" v-else>该商品已抢完</div>
+      </div>
+    </van-action-sheet>
   </div>
 </template>
 
 <script>
 import { getProComments, getProDetail } from '@/api/product'
 import defaultImg from '@/assets/default-avatar.png'
+import CountBox from '@/components/CountBox.vue'
 export default {
   name: 'ProDetail',
   async created () {
@@ -99,8 +129,14 @@ export default {
       detail: {},
       total: 0,
       commentList: [],
-      defaultImg
+      defaultImg,
+      model: 'cart',
+      showPannel: false,
+      addCount: 1
     }
+  },
+  components: {
+    CountBox
   },
   methods: {
     onChange (index) {
@@ -116,6 +152,38 @@ export default {
       const { data: { list, total } } = await getProComments(this.goodsId, 3)
       this.commentList = list
       this.total = total
+    },
+    addFn () {
+      this.model = 'cart'
+      this.showPannel = true
+    },
+    buyFn () {
+      this.model = 'buy'
+      this.showPannel = true
+    },
+    async addCart () {
+      // 判断是否登录，如果未登录 对话框提示登录
+      debugger
+      if (!this.$store.getters['user/token']) {
+        this.$dialog.confirm({
+          title: '请先登录',
+          message: '是否跳转到登录页面',
+          confirmButtonText: '去登录',
+          cancelButtonText: '取消'
+        }).then(() => {
+          this.$router.replace({
+            path: '/login',
+            query: {
+              backUrl: this.$route.fullPath
+            }
+          })
+        }).catch(() => {
+          console.log('xxx 提示登录异常')
+        })
+      } else {
+        // 添加购物车逻辑
+        console.log('添加购物车逻辑')
+      }
     }
   },
   computed: {
@@ -129,13 +197,16 @@ export default {
 <style lang="less" scoped>
 .prodetail {
   padding-top: 46px;
+
   ::v-deep .van-icon-arrow-left {
     color: #333;
   }
+
   img {
     display: block;
     width: 100%;
   }
+
   .custom-indicator {
     position: absolute;
     right: 10px;
@@ -145,30 +216,37 @@ export default {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 15px;
   }
+
   .desc {
     width: 100%;
     overflow: scroll;
+
     ::v-deep img {
       display: block;
-      width: 100%!important;
+      width: 100% !important;
     }
   }
+
   .info {
     padding: 10px;
   }
+
   .title {
     display: flex;
     justify-content: space-between;
+
     .now {
       color: #fa2209;
       font-size: 20px;
     }
+
     .oldprice {
       color: #959595;
       font-size: 16px;
       text-decoration: line-through;
       margin-left: 5px;
     }
+
     .sellcount {
       color: #959595;
       font-size: 16px;
@@ -176,11 +254,13 @@ export default {
       top: 4px;
     }
   }
+
   .msg {
     font-size: 16px;
     line-height: 24px;
     margin-top: 5px;
   }
+
   .service {
     display: flex;
     justify-content: space-between;
@@ -188,10 +268,12 @@ export default {
     margin-top: 10px;
     font-size: 16px;
     background-color: #fafafa;
+
     .left-words {
       span {
         margin-right: 10px;
       }
+
       .van-icon {
         margin-right: 4px;
         color: #fa2209;
@@ -202,9 +284,11 @@ export default {
   .comment {
     padding: 10px;
   }
+
   .comment-title {
     display: flex;
     justify-content: space-between;
+
     .right {
       color: #959595;
     }
@@ -213,19 +297,23 @@ export default {
   .comment-item {
     font-size: 16px;
     line-height: 30px;
+
     .top {
       height: 30px;
       display: flex;
       align-items: center;
       margin-top: 20px;
+
       img {
         width: 20px;
         height: 20px;
       }
+
       .name {
         margin: 0 10px;
       }
     }
+
     .time {
       color: #999;
     }
@@ -242,16 +330,20 @@ export default {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    .icon-home, .icon-cart {
+
+    .icon-home,
+    .icon-cart {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       font-size: 14px;
+
       .van-icon {
         font-size: 24px;
       }
     }
+
     .btn-add,
     .btn-buy {
       height: 36px;
@@ -263,12 +355,62 @@ export default {
       color: #fff;
       font-size: 14px;
     }
+
     .btn-buy {
       background-color: #fe5630;
     }
   }
 }
+
 .tips {
   padding: 10px;
+}
+
+.product {
+  .product-title {
+    display: flex;
+    .left {
+      img {
+        width: 90px;
+        height: 90px;
+      }
+      margin: 10px;
+    }
+    .right {
+      flex: 1;
+      padding: 10px;
+      .price {
+        font-size: 14px;
+        color: #fe560a;
+        .nowprice {
+          font-size: 24px;
+          margin: 0 5px;
+        }
+      }
+    }
+  }
+
+  .num-box {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center;
+  }
+
+  .btn, .btn-none {
+    height: 40px;
+    line-height: 40px;
+    margin: 20px;
+    border-radius: 20px;
+    text-align: center;
+    color: rgb(255, 255, 255);
+    background-color: rgb(255, 148, 2);
+  }
+  .btn.now {
+    background-color: #fe5630;
+  }
+  .btn-none {
+    background-color: #cccccc;
+  }
 }
 </style>
