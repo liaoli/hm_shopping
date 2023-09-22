@@ -4,7 +4,7 @@
 
     <van-swipe :autoplay="3000" @change="onChange">
       <van-swipe-item v-for="(image, index) in images" :key="index">
-        <img :src="image" />
+        <img v-lazy="image.external_url" />
       </van-swipe-item>
 
       <template #indicator>
@@ -39,13 +39,13 @@
     <!-- 商品评价 -->
     <div class="comment">
       <div class="comment-title">
-        <div class="left">商品评价 (5条)</div>
+        <div class="left">商品评价 ({{ total }}条)</div>
         <div class="right">查看更多 <van-icon name="arrow" /> </div>
       </div>
       <div class="comment-list">
-        <div class="comment-item" v-for="item in 3" :key="item">
+        <div class="comment-item" v-for="item in commentList" :key="item.comment_id">
           <div class="top">
-            <img src="http://cba.itlike.com/public/uploads/10001/20230321/a0db9adb2e666a65bc8dd133fbed7834.png" alt="">
+            <img :src="item.user.avatar_url || defaultImg" alt="">
             <div class="name">神雕大侠</div>
             <van-rate :size="16" :value="5" color="#ffd21e" void-icon="star" void-color="#eee"/>
           </div>
@@ -60,11 +60,8 @@
     </div>
 
     <!-- 商品描述 -->
-    <div class="desc">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/kHgx21fZMWwqirkMhawkAw.jpg" alt="">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/0rRMmncfF0kGjuK5cvLolg.jpg" alt="">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/2P04A4Jn0HKxbKYSHc17kw.jpg" alt="">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/MT4k-mPd0veQXWPPO5yTIw.jpg" alt="">
+    <div>商品描述</div>
+    <div class="desc" v-html="detail.content">
     </div>
 
     <!-- 底部 -->
@@ -84,9 +81,14 @@
 </template>
 
 <script>
-import { getProDetail } from '@/api/product'
+import { getProComments, getProDetail } from '@/api/product'
+import defaultImg from '@/assets/default-avatar.png'
 export default {
   name: 'ProDetail',
+  async created () {
+    this.getDetail()
+    this.getComments()
+  },
   data () {
     return {
       images: [
@@ -94,20 +96,26 @@ export default {
         'https://img01.yzcdn.cn/vant/apple-2.jpg'
       ],
       current: 0,
-      detail: {}
+      detail: {},
+      total: 0,
+      commentList: [],
+      defaultImg
     }
   },
   methods: {
     onChange (index) {
       this.current = index
     },
-    created () {
-      this.getDetail()
-    },
     async getDetail () {
       const { data: { detail } } = await getProDetail(this.goodsId)
+      // debugger
       this.detail = detail
       this.images = detail.goods_images
+    },
+    async getComments () {
+      const { data: { list, total } } = await getProComments(this.goodsId, 3)
+      this.commentList = list
+      this.total = total
     }
   },
   computed: {
