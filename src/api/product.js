@@ -10,3 +10,11 @@ export const getProList = (paramsObj) => {
     }
   })
 }
+
+export const getProDetail = (id) => {
+  return request.get('/goods/detail', {
+    params: {
+      id
+    }
+  })
+}
