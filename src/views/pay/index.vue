@@ -11,11 +11,11 @@
 
       <div class="info" v-if="true">
         <div class="info-content">
-          <span class="name">小红</span>
-          <span class="mobile">13811112222</span>
+          <span class="name">{{ selectAddress.name }}</span>
+          <span class="mobile">{{ selectAddress.phone }}</span>
         </div>
         <div class="info-address">
-          江苏省 无锡市 南长街 110号 504
+          {{ longAddress }}
         </div>
       </div>
 
@@ -95,13 +95,44 @@
 </template>
 
 <script>
+import { getAddressList } from '@/api/address'
 export default {
   name: 'PayIndex',
   data () {
     return {
+      addressList: [],
+      order: {},
+      personal: {}
+    }
+  },
+  created () {
+    this.getAddressList()
+  },
+  computed: {
+    selectAddress () {
+      return this.addressList[0] || {}
+    },
+    longAddress () {
+      const region = this.selectAddress.region
+
+      if (!region) {
+        return ''
+      }
+
+      return `${region.province}${region.city}${region.area}${this.selectAddress.detail}`
     }
   },
   methods: {
+    async getAddressList () {
+      const { data: { list } } = await getAddressList()
+      this.addressList = list
+    },
+    mode () {
+      return this.$route.query.mode
+    },
+    cartIds () {
+      return this.$route.query.cartIds
+    }
   }
 }
 </script>
