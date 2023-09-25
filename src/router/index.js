@@ -72,7 +72,7 @@ const authUrl = [
 ]
 
 router.beforeEach((to, from, next) => {
-  const token = store.getters.token
+  const token = store.getters['user/token']
   if (!authUrl.includes(to.path)) {
     next()
     return
