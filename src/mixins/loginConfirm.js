@@ -5,7 +5,6 @@ export default {
     // 2、不需要,返回false
     loginConfirm () {
       if (!this.$store.getters['user/token']) {
-        this.$router.push('/login')
         this.$dialog.confirm({
           title: '温馨提示',
           message: '需要登录才能进行此操作',
