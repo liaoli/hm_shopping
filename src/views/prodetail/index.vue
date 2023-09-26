@@ -102,7 +102,7 @@
         </div>
         <div class="showbtn" v-if="detail.stock_total > 0">
           <div class="btn" v-if="model === 'cart'" @click="addCart">加入购物车</div>
-          <div class="btn now" v-if="model === 'buy'">立刻购买</div>
+          <div class="btn now" v-if="model === 'buy'" @click="goBuyNow">立刻购买</div>
         </div>
         <div class="btn-none" v-else>该商品已抢完</div>
       </div>
@@ -115,8 +115,10 @@ import { getProComments, getProDetail } from '@/api/product'
 import defaultImg from '@/assets/default-avatar.png'
 import CountBox from '@/components/CountBox.vue'
 import { addCart2Server } from '@/api/cart'
+import loginConfirm from '@/mixins/loginConfirm'
 export default {
   name: 'ProDetail',
+  mixins: [loginConfirm],
   async created () {
     this.getDetail()
     this.getComments()
@@ -167,30 +169,43 @@ export default {
     async addCart () {
       // 判断是否登录，如果未登录 对话框提示登录
       // debugger
-      if (!this.$store.getters['user/token']) {
-        this.$dialog.confirm({
-          title: '请先登录',
-          message: '是否跳转到登录页面',
-          confirmButtonText: '去登录',
-          cancelButtonText: '取消'
-        }).then(() => {
-          this.$router.replace({
-            path: '/login',
-            query: {
-              backUrl: this.$route.fullPath
-            }
-          })
-        }).catch(() => {
-          console.log('xxx 提示登录异常')
-        })
-      } else {
-        // 添加购物车逻辑
-        console.log('添加购物车逻辑')
-        const { data } = await addCart2Server(this.goodsId, this.addCount, this.detail.skuList[0].goods_sku_id)
-        this.cartTotal = data.cartTotal
-        this.$toast('加入购物车成功')
-        this.showPannel = false
+      // if (!this.$store.getters['user/token']) {
+      //   this.$dialog.confirm({
+      //     title: '请先登录',
+      //     message: '是否跳转到登录页面',
+      //     confirmButtonText: '去登录',
+      //     cancelButtonText: '取消'
+      //   }).then(() => {
+      //     this.$router.replace({
+      //       path: '/login',
+      //       query: {
+      //         backUrl: this.$route.fullPath
+      //       }
+      //     })
+      //   }).catch(() => {
+      //     console.log('xxx 提示登录异常')
+      //   })
+      // } else
+      if (this.loginConfirm()) {
+        return
       }
+      // 添加购物车逻辑
+      console.log('添加购物车逻辑')
+      const { data } = await addCart2Server(this.goodsId, this.addCount, this.detail.skuList[0].goods_sku_id)
+      this.cartTotal = data.cartTotal
+      this.$toast('加入购物车成功')
+      this.showPannel = false
+    },
+    goBuyNow () {
+      this.$router.push({
+        path: '/pay',
+        query: {
+          mode: 'buyNow',
+          goodsId: this.goodsId,
+          skuId: this.detail.skuList[0].goods_sku_id,
+          goodsNum: this.addCount
+        }
+      })
     }
   },
   computed: {

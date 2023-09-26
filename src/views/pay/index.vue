@@ -128,6 +128,15 @@ export default {
     },
     cartIds () {
       return this.$route.query.cartIds
+    },
+    goodsId () {
+      return this.$route.query.goodsId
+    },
+    goodsSkuId () {
+      return this.$route.query.skuId
+    },
+    goodsNum () {
+      return this.$route.query.goodsNum
     }
   },
   methods: {
@@ -138,6 +147,10 @@ export default {
     async getOrderList () {
       if (this.mode === 'cart') {
         const { data: { order, personal } } = await checkOrder(this.mode, { cartIds: this.cartIds })
+        this.order = order
+        this.personal = personal
+      } else if (this.mode === 'buyNow') {
+        const { data: { order, personal } } = await checkOrder(this.mode, { goodsId: this.goodsId, goodsSkuId: this.goodsSkuId, goodsNum: this.goodsNum })
         this.order = order
         this.personal = personal
       }
