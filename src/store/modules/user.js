@@ -12,7 +12,12 @@ export default {
       setInfo(obj)
     }
   },
-  actions: {},
+  actions: {
+    logout (context) {
+      context.commit('setUserInfo', {})
+      context.commit('setCartList', [], { root: true })
+    }
+  },
   getters: {
     token (state) {
       return state.userInfo.token

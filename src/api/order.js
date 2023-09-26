@@ -11,3 +11,12 @@ export const checkOrder = (mode, obj) => {
     }
   })
 }
+
+export const getOrderList = (dataType, page) => {
+  return request.get('order/list', {
+    params: {
+      dataType,
+      page
+    }
+  })
+}
