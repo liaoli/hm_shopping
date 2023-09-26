@@ -31,31 +31,31 @@
     <!-- 订单明细 -->
     <div class="pay-list">
       <div class="list">
-        <div class="goods-item">
+        <div class="goods-item" v-for="item in order.goodsList" :key="item.goods_id">
             <div class="left">
               <img src="http://cba.itlike.com/public/uploads/10001/20230321/8f505c6c437fc3d4b4310b57b1567544.jpg" alt="" />
             </div>
             <div class="right">
               <p class="tit text-ellipsis-2">
-                 三星手机 SAMSUNG Galaxy S23 8GB+256GB 超视觉夜拍系统 超清夜景 悠雾紫 5G手机 游戏拍照旗舰机s23
+                 {{ item.goods_name }}
               </p>
               <p class="info">
-                <span class="count">x3</span>
-                <span class="price">¥9.99</span>
+              <span class="count">x{{ item.total_num }}</span>
+                <span class="price">¥{{ item.total_pay_price }}</span>
               </p>
             </div>
         </div>
       </div>
 
       <div class="flow-num-box">
-        <span>共 12 件商品，合计：</span>
-        <span class="money">￥1219.00</span>
+        <span>共 {{ order.orderTotalNum }} 件商品，合计：</span>
+        <span class="money">￥{{ order.orderTotalPrice }}</span>
       </div>
 
       <div class="pay-detail">
         <div class="pay-cell">
           <span>订单总金额：</span>
-          <span class="red">￥1219.00</span>
+          <span class="red">￥{{ order.orderTotalPrice }}</span>
         </div>
 
         <div class="pay-cell">
@@ -65,7 +65,7 @@
 
         <div class="pay-cell">
           <span>配送费用：</span>
-          <span v-if="false">请先选择配送地址</span>
+          <span v-if="!selectAddress">请先选择配送地址</span>
           <span v-else class="red">+￥0.00</span>
         </div>
       </div>
@@ -74,7 +74,7 @@
       <div class="pay-way">
         <span class="tit">支付方式</span>
         <div class="pay-cell">
-          <span><van-icon name="balance-o" />余额支付（可用 ¥ 999919.00 元）</span>
+          <span><van-icon name="balance-o" />余额支付（可用 ¥ {{ personal.balance }} 元）</span>
           <!-- <span>请先选择配送地址</span> -->
           <span class="red"><van-icon name="passed" /></span>
         </div>
@@ -88,7 +88,7 @@
 
     <!-- 底部提交 -->
     <div class="footer-fixed">
-      <div class="left">实付款：<span>￥999919</span></div>
+      <div class="left">实付款：<span>￥{{ order.orderTotalPrice }}</span></div>
       <div class="tipsbtn">提交订单</div>
     </div>
   </div>
@@ -96,6 +96,7 @@
 
 <script>
 import { getAddressList } from '@/api/address'
+import { checkOrder } from '@/api/order'
 export default {
   name: 'PayIndex',
   data () {
@@ -107,6 +108,7 @@ export default {
   },
   created () {
     this.getAddressList()
+    this.getOrderList()
   },
   computed: {
     selectAddress () {
@@ -120,6 +122,12 @@ export default {
       }
 
       return `${region.province}${region.city}${region.area}${this.selectAddress.detail}`
+    },
+    mode () {
+      return this.$route.query.mode
+    },
+    cartIds () {
+      return this.$route.query.cartIds
     }
   },
   methods: {
@@ -127,11 +135,12 @@ export default {
       const { data: { list } } = await getAddressList()
       this.addressList = list
     },
-    mode () {
-      return this.$route.query.mode
-    },
-    cartIds () {
-      return this.$route.query.cartIds
+    async getOrderList () {
+      if (this.mode === 'cart') {
+        const { data: { order, personal } } = await checkOrder(this.mode, { cartIds: this.cartIds })
+        this.order = order
+        this.personal = personal
+      }
     }
   }
 }
