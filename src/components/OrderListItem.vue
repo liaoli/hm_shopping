@@ -3,20 +3,20 @@
       <div class="tit">
         <div class="time">{{ item.create_time }}</div>
         <div class="status">
-          <span>{{ item.status_text }}</span>
+          <span>{{ item.state_text }}</span>
         </div>
       </div>
       <div class="list">
-        <div class="list-item">
+        <div class="list-item" v-for="(goods, index) in item.goods" :key="index">
           <div class="goods-img">
-            <img :src="item.goods_image" alt="">
+            <img :src="goods.goods_image" alt="">
           </div>
           <div class="goods-content text-ellipsis-2">
-            {{ item.goods_name }}
+            {{ goods.goods_name }}
           </div>
           <div class="goods-trade">
-            <p>¥ {{ item.total_pay_price }}</p>
-            <p>x {{ item.total_num }}</p>
+            <p>¥ {{ goods.total_pay_price }}</p>
+            <p>x {{ goods.total_num }}</p>
           </div>
         </div>
       </div>
